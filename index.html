@@ -12,20 +12,20 @@
     <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
     <style>
         :root { --bg-cream: #f9f5f0; --card-cream: #ffffff; --accent-brown: #d4a373; --light-brown: #f1ece4; --text-main: #5d574f; }
-        body { background-color: var(--bg-cream); color: var(--text-main); font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; -webkit-font-smoothing: antialiased; }
+        body { background-color: var(--bg-cream); color: var(--text-main); font-family: 'PingFang SC', sans-serif; -webkit-font-smoothing: antialiased; }
         .soft-card { background: var(--card-cream); border-radius: 32px; box-shadow: 0 15px 35px rgba(0,0,0,0.02); border: 1px solid rgba(255,255,255,0.6); padding: 2rem; margin-bottom: 2rem; }
-        .upload-block { background-color: var(--light-brown); border-radius: 24px; transition: all 0.4s ease; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 140px; width: 100%; }
-        .upload-block:hover { transform: scale(0.99); background-color: #ede6db; }
-        .btn-main { background-color: var(--accent-brown); color: white; border-radius: 50px; transition: all 0.3s ease; font-weight: bold; letter-spacing: 0.1em; }
+        .upload-block { background-color: var(--light-brown); border-radius: 24px; transition: all 0.4s ease; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 140px; width: 100%; border: 2px dashed transparent; }
+        .upload-block:hover { border-color: var(--accent-brown); background-color: #ede6db; }
+        .btn-main { background-color: var(--accent-brown); color: white; border-radius: 50px; transition: all 0.3s ease; font-weight: bold; }
         .btn-secondary { background-color: white; border: 1.5px solid var(--accent-brown); color: var(--accent-brown); border-radius: 50px; transition: all 0.3s ease; font-weight: bold; }
-        .img-item { border-radius: 16px; overflow: hidden; border: 2px solid transparent; background: #fff; }
+        .img-item { border-radius: 16px; overflow: hidden; border: 2px solid transparent; background: #fff; position: relative; aspect-ratio: 1/1; }
         #loader { display: none; position: fixed; inset: 0; background: rgba(249, 245, 240, 0.95); z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body class="pb-20">
     <div id="loader">
         <div class="w-8 h-8 border-2 border-[#d4a373] border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p id="loader-text" class="text-sm tracking-widest opacity-60">正在为您处理中...</p>
+        <p id="loader-text" class="text-sm opacity-60">正在为您处理中...</p>
     </div>
 
     <div class="max-w-2xl mx-auto px-6 pt-12">
@@ -38,45 +38,43 @@
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-sm font-bold tracking-widest">01 / 图片转 PDF</h2>
                 <div class="flex space-x-4">
-                    <button onclick="clearAll()" class="text-[11px] opacity-30 hover:opacity-100 transition">清空全部</button>
-                    <button onclick="deleteSelected()" class="text-[11px] text-[#c29161]">删除选中</button>
+                    <button onclick="window.clearAll()" class="text-[11px] opacity-30 hover:opacity-100 transition">清空全部</button>
+                    <button onclick="window.deleteSelected()" class="text-[11px] text-[#c29161]">删除选中</button>
                 </div>
             </div>
             <div onclick="document.getElementById('img-input').click()" class="upload-block mb-6">
                 <input type="file" id="img-input" multiple accept="image/*" class="hidden">
-                <span class="text-[11px] tracking-widest opacity-50 text-center px-4">点击此处上传或拖拽图片</span>
+                <span class="text-[11px] opacity-50">点击或拖拽图片上传</span>
             </div>
             <div id="image-preview" class="grid grid-cols-4 gap-3 mb-8"></div>
-            <div class="space-y-4">
-                <input type="text" id="pdf-name" value="我的PDF文档" class="w-full bg-transparent border-b border-[#eeeae4] pb-2 outline-none text-sm focus:border-[#d4a373]">
-                <button onclick="generatePDF()" class="btn-main w-full py-4 text-sm">生成 PDF 文件</button>
-            </div>
+            <input type="text" id="pdf-name" value="我的PDF文档" class="w-full bg-transparent border-b border-[#eeeae4] pb-2 mb-6 outline-none text-sm">
+            <button onclick="window.generatePDF()" class="btn-main w-full py-4 text-sm">生成 PDF 文件</button>
         </section>
 
         <section class="soft-card">
             <h2 class="text-sm font-bold tracking-widest mb-6">02 / 合并 PDF 文件</h2>
             <div onclick="document.getElementById('merge-input').click()" class="upload-block mb-6">
-                <input type="file" id="merge-input" multiple accept=".pdf" class="hidden" onchange="handleMergeFiles(this)">
-                <span id="merge-text" class="text-[11px] opacity-50 font-medium">选择多个 PDF 进行合并</span>
+                <input type="file" id="merge-input" multiple accept=".pdf" class="hidden" onchange="window.handleMergeFiles(this)">
+                <span id="merge-text" class="text-[11px] opacity-50">选择多个 PDF 进行合并</span>
             </div>
-            <button onclick="mergePDFs()" id="btn-merge" class="btn-main w-full py-4 text-sm opacity-50 cursor-not-allowed" disabled>执行合并导出</button>
+            <button onclick="window.mergePDFs()" id="btn-merge" class="btn-main w-full py-4 text-sm opacity-50 cursor-not-allowed" disabled>执行合并导出</button>
         </section>
 
         <section class="soft-card">
             <h2 class="text-sm font-bold tracking-widest mb-6">03 / PDF 格式转换</h2>
             <div onclick="document.getElementById('to-img-input').click()" class="upload-block mb-6">
-                <input type="file" id="to-img-input" accept=".pdf" class="hidden" onchange="handleConvertFile(this)">
+                <input type="file" id="to-img-input" accept=".pdf" class="hidden" onchange="window.handleConvertFile(this)">
                 <span id="convert-text" class="text-[11px] opacity-50">选择 PDF 导出为图片或 Word</span>
             </div>
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="pdfToImagesZip()" id="btn-convert-zip" class="btn-main py-4 text-xs opacity-50 cursor-not-allowed" disabled>导出图片 ZIP</button>
-                <button onclick="pdfToWordDoc()" id="btn-convert-word" class="btn-secondary py-4 text-xs opacity-50 cursor-not-allowed" disabled>导出 Word 文档</button>
+                <button onclick="window.pdfToImagesZip()" id="btn-convert-zip" class="btn-main py-4 text-xs opacity-50 cursor-not-allowed" disabled>导出图片 ZIP</button>
+                <button onclick="window.pdfToWordDoc()" id="btn-convert-word" class="btn-secondary py-4 text-xs opacity-50 cursor-not-allowed" disabled>导出 Word 文档</button>
             </div>
         </section>
 
         <section class="soft-card p-6 text-center">
             <textarea id="msg-input" rows="1" class="w-full bg-transparent text-sm outline-none text-center" placeholder="在此留下您的反馈或建议..."></textarea>
-            <button onclick="submitMessage()" class="text-[11px] tracking-widest mt-4 opacity-40 hover:opacity-100 transition font-bold text-[#d4a373]">提交留言反馈</button>
+            <button onclick="window.submitMessage()" class="text-[11px] tracking-widest mt-4 opacity-40 hover:opacity-100 transition font-bold text-[#d4a373]">提交留言反馈</button>
         </section>
 
         <div class="space-y-6 mt-12">
@@ -95,26 +93,39 @@
         const loader = document.getElementById('loader');
         const previewArea = document.getElementById('image-preview');
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        
+        // 初始化拖拽排序
         new Sortable(previewArea, { animation: 150 });
 
-        const setLoader = (show, text = '处理中') => { loader.style.display = show ? 'flex' : 'none'; document.getElementById('loader-text').innerText = text + '...'; };
-        
-        // 留言功能
-        window.submitMessage = async () => {
-            const content = document.getElementById('msg-input').value;
-            if (!content) return alert('请输入内容');
-            const { error } = await supabase.from('user_messages').insert([{ content: content }]);
-            if (!error) { alert('感谢反馈，留言已发送！'); document.getElementById('msg-input').value = ''; }
-            else { alert('发送失败，请确认数据库权限'); }
+        const setLoader = (show, text = '处理中') => { 
+            loader.style.display = show ? 'flex' : 'none'; 
+            document.getElementById('loader-text').innerText = text + '...'; 
         };
 
-        // 功能 01: 图片转 PDF
+        // --- 核心留言功能 ---
+        window.submitMessage = async () => {
+            const contentInput = document.getElementById('msg-input');
+            const content = contentInput.value.trim();
+            if (!content) return alert('请输入留言内容');
+            
+            try {
+                const { error } = await supabase.from('user_messages').insert([{ content: content }]);
+                if (error) throw error;
+                alert('感谢反馈，留言已成功送达！');
+                contentInput.value = '';
+            } catch (err) {
+                console.error("提交失败:", err);
+                alert('提交失败，请检查数据库权限或网络');
+            }
+        };
+
+        // --- 图片转PDF逻辑 ---
         document.getElementById('img-input').addEventListener('change', (e) => {
             Array.from(e.target.files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (ev) => {
                     const div = document.createElement('div');
-                    div.className = 'img-item relative aspect-square cursor-move shadow-sm';
+                    div.className = 'img-item shadow-sm cursor-move';
                     div.innerHTML = `<img src="${ev.target.result}" class="w-full h-full object-cover"><input type="checkbox" class="absolute top-1 left-1 w-4 h-4 accent-[#d4a373]">`;
                     previewArea.appendChild(div);
                 };
@@ -126,24 +137,29 @@
             const imgs = previewArea.querySelectorAll('img');
             if(imgs.length === 0) return alert('请先上传图片');
             setLoader(true, '正在生成 PDF');
-            const pdfDoc = await PDFLib.PDFDocument.create();
-            for (const el of imgs) {
-                const bytes = await fetch(el.src).then(res => res.arrayBuffer());
-                const img = el.src.includes('png') ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes);
-                const page = pdfDoc.addPage([img.width, img.height]);
-                page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
-            }
-            const blob = new Blob([await pdfDoc.save()], {type: 'application/pdf'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = document.getElementById('pdf-name').value + '.pdf'; a.click();
+            try {
+                const pdfDoc = await PDFLib.PDFDocument.create();
+                for (const el of imgs) {
+                    const bytes = await fetch(el.src).then(res => res.arrayBuffer());
+                    const img = el.src.includes('png') ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes);
+                    const page = pdfDoc.addPage([img.width, img.height]);
+                    page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+                }
+                const pdfBytes = await pdfDoc.save();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob([pdfBytes], {type: 'application/pdf'}));
+                a.download = (document.getElementById('pdf-name').value || 'WLB_Document') + '.pdf';
+                a.click();
+            } catch (e) { alert('生成失败'); }
             setLoader(false);
         };
 
-        // 功能 02: 合并 PDF
-        window.handleMergeFiles = (input) => {
-            const btn = document.getElementById('btn-merge');
-            if(input.files.length > 0) {
-                document.getElementById('merge-text').innerText = `已选择 ${input.files.length} 个文件`;
-                btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        // --- 合并与转换辅助逻辑 ---
+        window.handleMergeFiles = (i) => {
+            if(i.files.length > 0) {
+                document.getElementById('merge-text').innerText = `已选 ${i.files.length} 个文件`;
+                document.getElementById('btn-merge').disabled = false;
+                document.getElementById('btn-merge').classList.remove('opacity-50', 'cursor-not-allowed');
             }
         };
 
@@ -156,63 +172,63 @@
                 const pages = await merged.copyPages(pdf, pdf.getPageIndices());
                 pages.forEach(p => merged.addPage(p));
             }
-            const blob = new Blob([await merged.save()], {type: 'application/pdf'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'WLB_合并文档.pdf'; a.click();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([await merged.save()], {type:'application/pdf'}));
+            a.download = 'WLB_Merged.pdf'; a.click();
             setLoader(false);
         };
 
-        // 功能 03: 转换导出
-        window.handleConvertFile = (input) => {
-            const b1 = document.getElementById('btn-convert-zip');
-            const b2 = document.getElementById('btn-convert-word');
-            if(input.files.length > 0) {
-                document.getElementById('convert-text').innerText = `已就绪: ${input.files[0].name.substring(0,10)}...`;
-                [b1, b2].forEach(b => { b.disabled = false; b.classList.remove('opacity-50', 'cursor-not-allowed'); });
+        window.handleConvertFile = (i) => {
+            if(i.files.length > 0) {
+                document.getElementById('convert-text').innerText = '文件已就绪';
+                ['btn-convert-zip', 'btn-convert-word'].forEach(id => {
+                    const b = document.getElementById(id);
+                    b.disabled = false; b.classList.remove('opacity-50', 'cursor-not-allowed');
+                });
             }
         };
 
         window.pdfToImagesZip = async () => {
             const file = document.getElementById('to-img-input').files[0];
-            setLoader(true, '正在转为图片');
+            setLoader(true, '正在处理图片');
             const zip = new JSZip();
             const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const vp = page.getViewport({ scale: 2 });
                 const canvas = document.createElement('canvas');
-                canvas.height = vp.height; canvas.width = vp.width;
+                canvas.width = vp.width; canvas.height = vp.height;
                 await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
-                zip.file(`第${i}页.png`, canvas.toDataURL('image/png').split(',')[1], {base64: true});
+                zip.file(`Page_${i}.png`, canvas.toDataURL('image/png').split(',')[1], {base64: true});
             }
-            const blob = await zip.generateAsync({type:"blob"});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'WLB_图片导出.zip'; a.click();
+            const content = await zip.generateAsync({type:"blob"});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(content); a.download = 'WLB_Images.zip'; a.click();
             setLoader(false);
         };
 
         window.pdfToWordDoc = async () => {
             const file = document.getElementById('to-img-input').files[0];
-            setLoader(true, '正在转为 Word');
+            setLoader(true, '正在转换 Word');
             const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
-            const docSections = [];
+            const sections = [];
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
-                const vp = page.getViewport({ scale: 2 });
+                const vp = page.getViewport({ scale: 1.5 });
                 const canvas = document.createElement('canvas');
-                canvas.height = vp.height; canvas.width = vp.width;
+                canvas.width = vp.width; canvas.height = vp.height;
                 await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
-                const imgBuffer = await (await fetch(canvas.toDataURL('image/png'))).arrayBuffer();
-                docSections.push({ children: [new docx.Paragraph({ children: [new docx.ImageRun({ data: imgBuffer, transformation: { width: 500, height: 500 * (vp.height / vp.width) } })] })] });
+                const imgData = await (await fetch(canvas.toDataURL('image/png'))).arrayBuffer();
+                sections.push({ children: [new docx.Paragraph({ children: [new docx.ImageRun({ data: imgData, transformation: { width: 550, height: 550 * (vp.height / vp.width) } })] })] });
             }
-            const doc = new docx.Document({ sections: docSections });
-            const blob = await docx.Packer.toBlob(doc);
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'WLB_导出Word.docx'; a.click();
+            const blob = await docx.Packer.toBlob(new docx.Document({ sections }));
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'WLB_Export.docx'; a.click();
             setLoader(false);
         };
 
         window.clearAll = () => previewArea.innerHTML = '';
         window.deleteSelected = () => previewArea.querySelectorAll('.img-item').forEach(el => { if(el.querySelector('input').checked) el.remove(); });
 
-        // 加载广告
+        // 加载初始广告数据
         (async () => {
             const { data } = await supabase.from('ads_config').select('*').order('id', { ascending: true });
             if (data && data.length >= 2) {
