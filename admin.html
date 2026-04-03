@@ -1,63 +1,63 @@
-!DOCTYPE html
-html lang=zh-CN
-head
-    meta charset=UTF-8
-    titleWLB 管理后台title
-    script src=httpscdn.tailwindcss.comscript
-    style
-        root { --bg-cream #f9f5f0; --accent-brown #d4a373; --text-main #5d574f; }
-        body { background-color var(--bg-cream); color var(--text-main); font-family sans-serif; }
-        #login-overlay { position fixed; inset 0; background var(--bg-cream); z-index 1000; display flex; align-items center; justify-content center; }
-        .login-card { background white; border-radius 32px; padding 3rem; width 100%; max-width 400px; box-shadow 0 20px 50px rgba(0,0,0,0.05); }
-        #admin-content { display none; padding 2rem; }
-        .admin-card { background white; border-radius 24px; padding 1.5rem; box-shadow 0 10px 30px rgba(0,0,0,0.02); margin-bottom 1.5rem; }
-        .input-field { background #f1ece4; border-radius 12px; padding 0.75rem; width 100%; outline none; border 1px solid transparent; font-size 12px; margin-bottom 0.5rem; }
-        .btn-save { background var(--accent-brown); color white; padding 0.75rem 2rem; border-radius 50px; font-weight bold; font-size 12px; }
-    style
-head
-body
-    div id=login-overlay
-        div class=login-card text-center
-            h1 class=text-xl font-light tracking-[0.3em] mb-8 opacity-60管理员登录h1
-            div class=space-y-4
-                input type=text id=login-user placeholder=账号 class=input-field text-center
-                input type=password id=login-pass placeholder=密码 class=input-field text-center
-                button onclick=handleLogin() class=btn-save w-full mt-4登录系统button
-            div
-            p id=login-error class=text-[10px] text-red-400 mt-4 opacity-0 transition-opacity账号或密码有误p
-        div
-    div
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>WLB 管理后台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --bg-cream: #f9f5f0; --accent-brown: #d4a373; --text-main: #5d574f; }
+        body { background-color: var(--bg-cream); color: var(--text-main); font-family: sans-serif; }
+        #login-overlay { position: fixed; inset: 0; background: var(--bg-cream); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: white; border-radius: 32px; padding: 3rem; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
+        #admin-content { display: none; padding: 2rem; }
+        .admin-card { background: white; border-radius: 24px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.02); margin-bottom: 1.5rem; }
+        .input-field { background: #f1ece4; border-radius: 12px; padding: 0.75rem; width: 100%; outline: none; border: 1px solid transparent; font-size: 12px; margin-bottom: 0.5rem; }
+        .btn-save { background: var(--accent-brown); color: white; padding: 0.75rem 2rem; border-radius: 50px; font-weight: bold; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div id="login-overlay">
+        <div class="login-card text-center">
+            <h1 class="text-xl font-light tracking-[0.3em] mb-8 opacity-60">管理员登录</h1>
+            <div class="space-y-4">
+                <input type="text" id="login-user" placeholder="账号" class="input-field text-center">
+                <input type="password" id="login-pass" placeholder="密码" class="input-field text-center">
+                <button onclick="handleLogin()" class="btn-save w-full mt-4">登录系统</button>
+            </div>
+            <p id="login-error" class="text-[10px] text-red-400 mt-4 opacity-0 transition-opacity">账号或密码有误</p>
+        </div>
+    </div>
 
-    div id=admin-content class=max-w-2xl mx-auto
-        header class=mb-10 flex justify-between items-center
-            span class=text-xs font-bold tracking-widest opacity-40WLB 管理面板span
-            button onclick=location.reload() class=text-[11px] opacity-30退出button
-        header
+    <div id="admin-content" class="max-w-2xl mx-auto">
+        <header class="mb-10 flex justify-between items-center">
+            <span class="text-xs font-bold tracking-widest opacity-40">WLB 管理面板</span>
+            <button onclick="location.reload()" class="text-[11px] opacity-30">退出</button>
+        </header>
 
-        div class=grid grid-cols-3 gap-4 mb-6 text-center
-            div class=admin-cardp class=text-[10px] opacity-40 mb-1图片转PDFph2 id=stat-1 class=text-xl0h2div
-            div class=admin-cardp class=text-[10px] opacity-40 mb-1PDF合并ph2 id=stat-2 class=text-xl0h2div
-            div class=admin-cardp class=text-[10px] opacity-40 mb-1转换导出ph2 id=stat-3 class=text-xl0h2div
-        div
+        <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+            <div class="admin-card"><p class="text-[10px] opacity-40 mb-1">图片转PDF</p><h2 id="stat-1" class="text-xl">0</h2></div>
+            <div class="admin-card"><p class="text-[10px] opacity-40 mb-1">PDF合并</p><h2 id="stat-2" class="text-xl">0</h2></div>
+            <div class="admin-card"><p class="text-[10px] opacity-40 mb-1">转换导出</p><h2 id="stat-3" class="text-xl">0</h2></div>
+        </div>
 
-        div class=admin-card
-            h2 class=text-xs font-bold mb-4 opacity-60广告位管理h2
-            divp class=text-[9px] mb-1 opacity-40广告位 1 (图链)pinput id=ad1-img class=input-fieldinput id=ad1-link class=input-fielddiv
-            div class=mt-4p class=text-[9px] mb-1 opacity-40广告位 2 (图链)pinput id=ad2-img class=input-fieldinput id=ad2-link class=input-fielddiv
-            button onclick=saveAds() class=btn-save mt-4 w-full确认更新button
-        div
+        <div class="admin-card">
+            <h2 class="text-xs font-bold mb-4 opacity-60">广告位管理</h2>
+            <div><p class="text-[9px] mb-1 opacity-40">广告位 1 (图/链)</p><input id="ad1-img" class="input-field"><input id="ad1-link" class="input-field"></div>
+            <div class="mt-4"><p class="text-[9px] mb-1 opacity-40">广告位 2 (图/链)</p><input id="ad2-img" class="input-field"><input id="ad2-link" class="input-field"></div>
+            <button onclick="saveAds()" class="btn-save mt-4 w-full">确认更新</button>
+        </div>
 
-        div class=admin-card
-            h2 class=text-xs font-bold mb-4 opacity-60最新反馈留言h2
-            div id=message-list class=space-y-2 text-xsdiv
-        div
-    div
+        <div class="admin-card">
+            <h2 class="text-xs font-bold mb-4 opacity-60">最新反馈留言</h2>
+            <div id="message-list" class="space-y-2 text-xs"></div>
+        </div>
+    </div>
 
-    script type=module
-        import { createClient } from 'httpscdn.jsdelivr.netnpm@supabasesupabase-js+esm'
-        const supabase = createClient('httpshgijeymlmywiaxgaitml.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnaWpleW1sbXl3aWF4Z2FpdG1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNzE0MDQsImV4cCI6MjA5MDc0NzQwNH0.6NaI6LO9BafmLanlAH_ZSouNoQZ11yr3NwROLMCdRIM')
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+        const supabase = createClient('https://hgijeymlmywiaxgaitml.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnaWpleW1sbXl3aWF4Z2FpdG1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNzE0MDQsImV4cCI6MjA5MDc0NzQwNH0.6NaI6LO9BafmLanlAH_ZSouNoQZ11yr3NwROLMCdRIM')
 
-        window.handleLogin = () = {
+        window.handleLogin = () => {
             if (document.getElementById('login-user').value === 'wilink' && document.getElementById('login-pass').value === 'link0404') {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('admin-content').style.display = 'block';
@@ -68,29 +68,29 @@ body
         };
 
         async function load() {
-            const { data stats } = await supabase.from('usage_stats').select('');
+            const { data: stats } = await supabase.from('usage_stats').select('*');
             if(stats){
-                document.getElementById('stat-1').innerText = stats.find(s=s.feature_name==='img-to-pdf').count  0;
-                document.getElementById('stat-2').innerText = stats.find(s=s.feature_name==='merge-pdf').count  0;
-                document.getElementById('stat-3').innerText = stats.find(s=s.feature_name==='pdf-convert').count  0;
+                document.getElementById('stat-1').innerText = stats.find(s=>s.feature_name==='img-to-pdf')?.count || 0;
+                document.getElementById('stat-2').innerText = stats.find(s=>s.feature_name==='merge-pdf')?.count || 0;
+                document.getElementById('stat-3').innerText = stats.find(s=>s.feature_name==='pdf-convert')?.count || 0;
             }
-            const { data ads } = await supabase.from('ads_config').select('').order('id',{ascendingtrue});
+            const { data: ads } = await supabase.from('ads_config').select('*').order('id',{ascending:true});
             if(ads){
                 document.getElementById('ad1-img').value = ads[0].img_url; document.getElementById('ad1-link').value = ads[0].link_url;
                 document.getElementById('ad2-img').value = ads[1].img_url; document.getElementById('ad2-link').value = ads[1].link_url;
             }
-            const { data msgs } = await supabase.from('user_messages').select('').order('created_at',{ascendingfalse});
-            document.getElementById('message-list').innerHTML = msgs.map(m=`div class=border-b py-2 flex justify-betweenspan${m.content}spanspan class=opacity-30${new Date(m.created_at).toLocaleDateString()}spandiv`).join('');
+            const { data: msgs } = await supabase.from('user_messages').select('*').order('created_at',{ascending:false});
+            document.getElementById('message-list').innerHTML = msgs.map(m=>`<div class="border-b py-2 flex justify-between"><span>${m.content}</span><span class="opacity-30">${new Date(m.created_at).toLocaleDateString()}</span></div>`).join('');
         }
 
-        window.saveAds = async () = {
+        window.saveAds = async () => {
             const updates = [
-                {id1, img_url document.getElementById('ad1-img').value, link_url document.getElementById('ad1-link').value},
-                {id2, img_url document.getElementById('ad2-img').value, link_url document.getElementById('ad2-link').value}
+                {id:1, img_url: document.getElementById('ad1-img').value, link_url: document.getElementById('ad1-link').value},
+                {id:2, img_url: document.getElementById('ad2-img').value, link_url: document.getElementById('ad2-link').value}
             ];
             for(let item of updates) await supabase.from('ads_config').update(item).eq('id', item.id);
             alert('更新成功！');
         };
-    script
-body
-html
+    </script>
+</body>
+</html>
