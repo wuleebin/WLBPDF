@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>WLB Admin - 后端管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --bg-cream: #f9f5f0; --accent-brown: #d4a373; --text-main: #5d574f; }
+        body { background-color: var(--bg-cream); color: var(--text-main); font-family: sans-serif; padding: 2rem; }
+        .admin-card { background: white; border-radius: 24px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.02); margin-bottom: 1.5rem; }
+        .input-field { background: #f1ece4; border-radius: 12px; padding: 0.75rem; width: 100%; outline: none; border: 1px solid transparent; font-size: 12px; margin-bottom: 0.5rem; }
+        .btn-save { background: var(--accent-brown); color: white; padding: 0.75rem 2rem; border-radius: 50px; font-weight: bold; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="max-w-2xl mx-auto">
+        <header class="mb-10 text-center uppercase tracking-widest opacity-60">WLB Admin Panel</header>
+
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="admin-card text-center"><p class="text-[10px] opacity-40">图片转PDF</p><h2 id="stat-1" class="text-xl">0</h2></div>
+            <div class="admin-card text-center"><p class="text-[10px] opacity-40">PDF合并</p><h2 id="stat-2" class="text-xl">0</h2></div>
+            <div class="admin-card text-center"><p class="text-[10px] opacity-40">PDF转换</p><h2 id="stat-3" class="text-xl">0</h2></div>
+        </div>
+
+        <div class="admin-card">
+            <h2 class="text-xs font-bold mb-4">广告位设置</h2>
+            <div><p class="text-[10px] mb-1">AD 01 (IMG / LINK)</p><input id="ad1-img" class="input-field"><input id="ad1-link" class="input-field"></div>
+            <div class="mt-4"><p class="text-[10px] mb-1">AD 02 (IMG / LINK)</p><input id="ad2-img" class="input-field"><input id="ad2-link" class="input-field"></div>
+            <button onclick="saveAds()" class="btn-save mt-4 w-full">保存配置</button>
+        </div>
+
+        <div class="admin-card">
+            <h2 class="text-xs font-bold mb-4">最新留言</h2>
+            <div id="message-list" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+        const supabase = createClient('https://hgijeymlmywiaxgaitml.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnaWpleW1sbXl3aWF4Z2FpdG1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNzE0MDQsImV4cCI6MjA5MDc0NzQwNH0.6NaI6LO9BafmLanlAH_ZSouNoQZ11yr3NwROLMCdRIM')
+
+        async function load() {
+            const { data: stats } = await supabase.from('usage_stats').select('*');
+            if(stats){
+                document.getElementById('stat-1').innerText = stats.find(s=>s.feature_name==='img-to-pdf')?.count || 0;
+                document.getElementById('stat-2').innerText = stats.find(s=>s.feature_name==='merge-pdf')?.count || 0;
+                document.getElementById('stat-3').innerText = stats.find(s=>s.feature_name==='pdf-convert')?.count || 0;
+            }
+            const { data: ads } = await supabase.from('ads_config').select('*').order('id',{ascending:true});
+            if(ads){
+                document.getElementById('ad1-img').value = ads[0].img_url; document.getElementById('ad1-link').value = ads[0].link_url;
+                document.getElementById('ad2-img').value = ads[1].img_url; document.getElementById('ad2-link').value = ads[1].link_url;
+            }
+            const { data: msgs } = await supabase.from('user_messages').select('*').order('created_at',{ascending:false});
+            document.getElementById('message-list').innerHTML = msgs.map(m=>`<div class="border-b py-2 text-[10px] flex justify-between"><span>${m.content}</span><span class="opacity-20">${new Date(m.created_at).toLocaleDateString()}</span></div>`).join('');
+        }
+
+        window.saveAds = async () => {
+            const updates = [
+                {id:1, img_url: document.getElementById('ad1-img').value, link_url: document.getElementById('ad1-link').value},
+                {id:2, img_url: document.getElementById('ad2-img').value, link_url: document.getElementById('ad2-link').value}
+            ];
+            for(let item of updates) await supabase.from('ads_config').update(item).eq('id', item.id);
+            alert('Updated!');
+        };
+        load();
+    </script>
+</body>
+</html>

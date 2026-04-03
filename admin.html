@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>WLB Admin - 安全登录</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --bg-cream: #f9f5f0; --accent-brown: #d4a373; --text-main: #5d574f; }
+        body { background-color: var(--bg-cream); color: var(--text-main); font-family: sans-serif; }
+        
+        /* 登录遮罩层样式 */
+        #login-overlay {
+            position: fixed; inset: 0; background: var(--bg-cream); z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .login-card { background: white; border-radius: 32px; padding: 3rem; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
+        
+        /* 后台主体样式 (默认隐藏) */
+        #admin-content { display: none; padding: 2rem; }
+        
+        .admin-card { background: white; border-radius: 24px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.02); margin-bottom: 1.5rem; }
+        .input-field { background: #f1ece4; border-radius: 12px; padding: 0.75rem; width: 100%; outline: none; border: 1px solid transparent; font-size: 12px; margin-bottom: 0.5rem; }
+        .btn-save { background: var(--accent-brown); color: white; padding: 0.75rem 2rem; border-radius: 50px; font-weight: bold; font-size: 12px; transition: 0.3s; }
+        .btn-save:hover { filter: brightness(1.1); }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-card text-center">
+            <h1 class="text-xl font-light tracking-[0.3em] uppercase mb-8 opacity-60">WLB Auth</h1>
+            <div class="space-y-4">
+                <input type="text" id="login-user" placeholder="USERNAME" class="input-field text-center tracking-widest uppercase">
+                <input type="password" id="login-pass" placeholder="PASSWORD" class="input-field text-center tracking-widest">
+                <button onclick="handleLogin()" class="btn-save w-full mt-4">LOGIN</button>
+            </div>
+            <p id="login-error" class="text-[10px] text-red-400 mt-4 opacity-0 transition-opacity uppercase tracking-widest">账号或密码错误</p>
+        </div>
+    </div>
+
+    <div id="admin-content" class="max-w-2xl mx-auto">
+        <header class="mb-10 flex justify-between items-center">
+            <span class="text-xs font-bold uppercase tracking-widest opacity-40">WLB Control Panel</span>
+            <button onclick="location.reload()" class="text-[10px] opacity-30 hover:opacity-100">LOGOUT</button>
+        </header>
+
+        <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+            <div class="admin-card"><p class="text-[9px] opacity-30 uppercase">Img to Pdf</p><h2 id="stat-1" class="text-xl">0</h2></div>
+            <div class="admin-card"><p class="text-[9px] opacity-30 uppercase">Merge Pdf</p><h2 id="stat-2" class="text-xl">0</h2></div>
+            <div class="admin-card"><p class="text-[9px] opacity-30 uppercase">Converter</p><h2 id="stat-3" class="text-xl">0</h2></div>
+        </div>
+
+        <div class="admin-card">
+            <h2 class="text-xs font-bold mb-6 uppercase tracking-widest opacity-60">Ad Management</h2>
+            <div class="space-y-6">
+                <div><p class="text-[9px] mb-2 opacity-40 font-bold uppercase">Position 01</p><input id="ad1-img" class="input-field" placeholder="Image URL"><input id="ad1-link" class="input-field" placeholder="Link URL"></div>
+                <div><p class="text-[9px] mb-2 opacity-40 font-bold uppercase">Position 02</p><input id="ad2-img" class="input-field" placeholder="Image URL"><input id="ad2-link" class="input-field" placeholder="Link URL"></div>
+            </div>
+            <button onclick="saveAds()" class="btn-save mt-6 w-full uppercase tracking-widest">Update Ads</button>
+        </div>
+
+        <div class="admin-card">
+            <h2 class="text-xs font-bold mb-6 uppercase tracking-widest opacity-60">Recent Feedback</h2>
+            <div id="message-list" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+        
+        const SUPABASE_URL = 'https://hgijeymlmywiaxgaitml.supabase.co'
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnaWpleW1sbXl3aWF4Z2FpdG1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNzE0MDQsImV4cCI6MjA5MDc0NzQwNH0.6NaI6LO9BafmLanlAH_ZSouNoQZ11yr3NwROLMCdRIM'
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+        // --- 1. 登录验证逻辑 ---
+        window.handleLogin = () => {
+            const user = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+            const errorHint = document.getElementById('login-error');
+
+            // 预设账号: wilink, 密码: link0404
+            if (user === 'wilink' && pass === 'link0404') {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('admin-content').style.display = 'block';
+                loadAdminData(); // 验证成功后加载数据
+            } else {
+                errorHint.style.opacity = '1';
+                setTimeout(() => { errorHint.style.opacity = '0'; }, 2000);
+            }
+        };
+
+        // 回车登录支持
+        document.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') handleLogin();
+        });
+
+        // --- 2. 后端数据加载逻辑 ---
+        async function loadAdminData() {
+            // A. 加载统计
+            const { data: stats } = await supabase.from('usage_stats').select('*');
+            if(stats){
+                document.getElementById('stat-1').innerText = stats.find(s=>s.feature_name==='img-to-pdf')?.count || 0;
+                document.getElementById('stat-2').innerText = stats.find(s=>s.feature_name==='merge-pdf')?.count || 0;
+                document.getElementById('stat-3').innerText = stats.find(s=>s.feature_name==='pdf-convert')?.count || 0;
+            }
+
+            // B. 加载广告配置
+            const { data: ads } = await supabase.from('ads_config').select('*').order('id',{ascending:true});
+            if(ads && ads.length >= 2){
+                document.getElementById('ad1-img').value = ads[0].img_url; document.getElementById('ad1-link').value = ads[0].link_url;
+                document.getElementById('ad2-img').value = ads[1].img_url; document.getElementById('ad2-link').value = ads[1].link_url;
+            }
+
+            // C. 加载留言
+            const { data: msgs } = await supabase.from('user_messages').select('*').order('created_at',{ascending:false});
+            document.getElementById('message-list').innerHTML = msgs.length ? msgs.map(m=>`
+                <div class="border-b border-[#f1ece4] py-3 flex justify-between items-center">
+                    <p class="text-[10px] text-[#5d574f]">${m.content}</p>
+                    <span class="text-[8px] opacity-20 uppercase">${new Date(m.created_at).toLocaleDateString()}</span>
+                </div>
+            `).join('') : '<p class="text-[10px] opacity-20 italic">No messages.</p>';
+        }
+
+        // --- 3. 保存广告修改 ---
+        window.saveAds = async () => {
+            const updates = [
+                {id:1, img_url: document.getElementById('ad1-img').value, link_url: document.getElementById('ad1-link').value},
+                {id:2, img_url: document.getElementById('ad2-img').value, link_url: document.getElementById('ad2-link').value}
+            ];
+            
+            try {
+                for(let item of updates) {
+                    await supabase.from('ads_config').update(item).eq('id', item.id);
+                }
+                alert('WLB 广告已实时更新！');
+            } catch (err) {
+                alert('更新失败，请检查 Supabase RLS 权限设置');
+            }
+        };
+    </script>
+</body>
+</html>
