@@ -80,7 +80,9 @@
                 document.getElementById('ad2-img').value = ads[1].img_url; document.getElementById('ad2-link').value = ads[1].link_url;
             }
             const { data: msgs } = await supabase.from('user_messages').select('*').order('created_at',{ascending:false});
-            document.getElementById('message-list').innerHTML = msgs.map(m=>`<div class="border-b py-2 flex justify-between"><span>${m.content}</span><span class="opacity-30">${new Date(m.created_at).toLocaleDateString()}</span></div>`).join('');
+            if(msgs) {
+                document.getElementById('message-list').innerHTML = msgs.map(m=>`<div class="border-b py-2 flex justify-between"><span>${m.content}</span><span class="opacity-30">${new Date(m.created_at).toLocaleDateString()}</span></div>`).join('');
+            }
         }
 
         window.saveAds = async () => {
