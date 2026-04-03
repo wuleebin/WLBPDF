@@ -12,7 +12,7 @@
     <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
     <style>
         :root { --bg-cream: #f9f5f0; --card-cream: #ffffff; --accent-brown: #d4a373; --light-brown: #f1ece4; --text-main: #5d574f; }
-        body { background-color: var(--bg-cream); color: var(--text-main); font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; -webkit-font-smoothing: antialiased; }
+        body { background-color: var(--bg-cream); color: var(--text-main); font-family: 'PingFang SC', sans-serif; -webkit-font-smoothing: antialiased; }
         .soft-card { background: var(--card-cream); border-radius: 32px; box-shadow: 0 15px 35px rgba(0,0,0,0.02); border: 1px solid rgba(255,255,255,0.6); padding: 2rem; margin-bottom: 2rem; }
         .upload-block { background-color: var(--light-brown); border-radius: 24px; transition: all 0.4s ease; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 140px; width: 100%; }
         .upload-block:hover { transform: scale(0.99); background-color: #ede6db; }
@@ -20,13 +20,12 @@
         .btn-secondary { background-color: white; border: 1.5px solid var(--accent-brown); color: var(--accent-brown); border-radius: 50px; transition: all 0.3s ease; font-weight: bold; }
         .img-item { border-radius: 16px; overflow: hidden; border: 2px solid transparent; background: #fff; }
         #loader { display: none; position: fixed; inset: 0; background: rgba(249, 245, 240, 0.95); z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
-        ::-webkit-scrollbar { width: 0px; }
     </style>
 </head>
 <body class="pb-20">
     <div id="loader">
         <div class="w-8 h-8 border-2 border-[#d4a373] border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p id="loader-text" class="text-sm tracking-widest opacity-60">正在为您处理中...</p>
+        <p id="loader-text" class="text-sm opacity-60">正在为您处理中...</p>
     </div>
 
     <div class="max-w-2xl mx-auto px-6 pt-12">
@@ -45,12 +44,12 @@
             </div>
             <div onclick="document.getElementById('img-input').click()" class="upload-block mb-6">
                 <input type="file" id="img-input" multiple accept="image/*" class="hidden">
-                <span class="text-[11px] tracking-widest opacity-50 text-center px-4">点击此处上传或拖拽图片</span>
+                <span class="text-[11px] opacity-50 text-center px-4">点击此处上传或拖拽图片</span>
             </div>
             <div id="image-preview" class="grid grid-cols-4 gap-3 mb-8"></div>
             <div class="space-y-4">
                 <input type="text" id="pdf-name" value="我的PDF文档" class="w-full bg-transparent border-b border-[#eeeae4] pb-2 outline-none text-sm focus:border-[#d4a373]">
-                <button onclick="generatePDF()" class="btn-main w-full py-4 text-sm">生成 PDF 文件</button>
+                <button onclick="generatePDF()" class="btn-main w-full py-4 text-sm">一键生成 PDF</button>
             </div>
         </section>
 
@@ -58,7 +57,7 @@
             <h2 class="text-sm font-bold tracking-widest mb-6">02 / 合并 PDF 文件</h2>
             <div onclick="document.getElementById('merge-input').click()" class="upload-block mb-6">
                 <input type="file" id="merge-input" multiple accept=".pdf" class="hidden" onchange="handleMergeFiles(this)">
-                <span id="merge-text" class="text-[11px] opacity-50 font-medium">选择多个 PDF 进行合并</span>
+                <span id="merge-text" class="text-[11px] opacity-50">选择多个 PDF 进行合并</span>
             </div>
             <button onclick="mergePDFs()" id="btn-merge" class="btn-main w-full py-4 text-sm opacity-50 cursor-not-allowed" disabled>执行合并导出</button>
         </section>
@@ -88,10 +87,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-        
-        const SUPABASE_URL = 'https://hgijeymlmywiaxgaitml.supabase.co'
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnaWpleW1sbXl3aWF4Z2FpdG1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNzE0MDQsImV4cCI6MjA5MDc0NzQwNH0.6NaI6LO9BafmLanlAH_ZSouNoQZ11yr3NwROLMCdRIM'
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+        const supabase = createClient('https://hgijeymlmywiaxgaitml.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnaWpleW1sbXl3aWF4Z2FpdG1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNzE0MDQsImV4cCI6MjA5MDc0NzQwNH0.6NaI6LO9BafmLanlAH_ZSouNoQZ11yr3NwROLMCdRIM')
 
         const loader = document.getElementById('loader');
         const previewArea = document.getElementById('image-preview');
@@ -101,58 +97,20 @@
         const setLoader = (show, text = '处理中') => { loader.style.display = show ? 'flex' : 'none'; document.getElementById('loader-text').innerText = text + '...'; };
         const trackUsage = async (feature) => { await supabase.rpc('increment_usage', { row_id: feature }); };
 
-        async function saveFile(blob, name, mime) {
-            if (window.showSaveFilePicker) {
-                try {
-                    const handle = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: '文件', accept: { [mime]: [`.${name.split('.').pop()}`] } }] });
-                    const writable = await handle.createWritable(); await writable.write(blob); await writable.close();
-                } catch (e) {}
-            } else {
-                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
-            }
-        }
-
-        // 图片选择
-        document.getElementById('img-input').addEventListener('change', (e) => {
-            Array.from(e.target.files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const div = document.createElement('div');
-                    div.className = 'img-item relative aspect-square cursor-move shadow-sm';
-                    div.innerHTML = `<img src="${ev.target.result}" class="w-full h-full object-cover"><input type="checkbox" class="absolute top-1 left-1 w-4 h-4 accent-[#d4a373]">`;
-                    div.onclick = (event) => { if(event.target.type !== 'checkbox') { const ck = div.querySelector('input'); ck.checked = !ck.checked; div.style.borderColor = ck.checked ? '#d4a373' : 'transparent'; } };
-                    previewArea.appendChild(div);
-                };
-                reader.readAsDataURL(file);
-            });
-        });
-
-        // 挂载函数到全局以支持 HTML onclick
+        // 核心功能挂载
         window.generatePDF = async () => {
             const imgs = previewArea.querySelectorAll('img');
             if(imgs.length === 0) return alert('请先上传图片');
-            setLoader(true, '正在生成 PDF');
-            try {
-                const pdfDoc = await PDFLib.PDFDocument.create();
-                for (const el of imgs) {
-                    const bytes = await fetch(el.src).then(res => res.arrayBuffer());
-                    const img = el.src.includes('png') ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes);
-                    const page = pdfDoc.addPage([img.width, img.height]);
-                    page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
-                }
-                const bytes = await pdfDoc.save();
-                await saveFile(new Blob([bytes]), document.getElementById('pdf-name').value + '.pdf', 'application/pdf');
-                await trackUsage('img-to-pdf');
-            } catch(e) { alert('生成失败'); }
-            setLoader(false);
-        };
-
-        window.handleMergeFiles = (input) => {
-            const btn = document.getElementById('btn-merge');
-            if(input.files.length > 0) {
-                document.getElementById('merge-text').innerText = `已选 ${input.files.length} 个文件`;
-                btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            setLoader(true, '生成 PDF 中');
+            const pdfDoc = await PDFLib.PDFDocument.create();
+            for (const el of imgs) {
+                const bytes = await fetch(el.src).then(res => res.arrayBuffer());
+                const img = el.src.includes('png') ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes);
+                const page = pdfDoc.addPage([img.width, img.height]);
+                page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
             }
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([await pdfDoc.save()])); a.download = document.getElementById('pdf-name').value + '.pdf'; a.click();
+            await trackUsage('img-to-pdf'); setLoader(false);
         };
 
         window.mergePDFs = async () => {
@@ -164,19 +122,8 @@
                 const pages = await merged.copyPages(pdf, pdf.getPageIndices());
                 pages.forEach(p => merged.addPage(p));
             }
-            const bytes = await merged.save();
-            await saveFile(new Blob([bytes]), 'WLB_合并文档.pdf', 'application/pdf');
-            await trackUsage('merge-pdf');
-            setLoader(false);
-        };
-
-        window.handleConvertFile = (input) => {
-            const b1 = document.getElementById('btn-convert-zip');
-            const b2 = document.getElementById('btn-convert-word');
-            if(input.files.length > 0) {
-                document.getElementById('convert-text').innerText = `已就绪: ${input.files[0].name.substring(0,10)}...`;
-                [b1, b2].forEach(b => { b.disabled = false; b.classList.remove('opacity-50', 'cursor-not-allowed'); });
-            }
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([await merged.save()])); a.download = 'WLB_合并.pdf'; a.click();
+            await trackUsage('merge-pdf'); setLoader(false);
         };
 
         window.pdfToImagesZip = async () => {
@@ -188,68 +135,33 @@
                 const page = await pdf.getPage(i);
                 const vp = page.getViewport({ scale: 2 });
                 const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.height = vp.height; canvas.width = vp.width;
-                await page.render({ canvasContext: ctx, viewport: vp }).promise;
-                zip.file(`第${i}页.png`, canvas.toDataURL('image/png').split(',')[1], {base64: true});
+                await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+                zip.file(`页${i}.png`, canvas.toDataURL('image/png').split(',')[1], {base64: true});
             }
-            const content = await zip.generateAsync({type:"blob"});
-            await saveFile(content, 'WLB_图片导出.zip', 'application/zip');
-            await trackUsage('pdf-convert');
-            setLoader(false);
+            const a = document.createElement('a'); a.href = URL.createObjectURL(await zip.generateAsync({type:"blob"})); a.download = 'WLB_图片.zip'; a.click();
+            await trackUsage('pdf-convert'); setLoader(false);
         };
 
-        window.pdfToWordDoc = async () => {
-            const file = document.getElementById('to-img-input').files[0];
-            setLoader(true, '正在转为 Word');
-            try {
-                const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
-                const docSections = [];
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const vp = page.getViewport({ scale: 2 });
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    canvas.height = vp.height; canvas.width = vp.width;
-                    await page.render({ canvasContext: ctx, viewport: vp }).promise;
-                    const imgBuffer = await (await fetch(canvas.toDataURL('image/png'))).arrayBuffer();
-                    docSections.push({ children: [new docx.Paragraph({ children: [new docx.ImageRun({ data: imgBuffer, transformation: { width: 500, height: 500 * (vp.height / vp.width) } })] })] });
-                }
-                const doc = new docx.Document({ sections: docSections });
-                const blob = await docx.Packer.toBlob(doc);
-                await saveFile(blob, 'WLB_导出文档.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-                await trackUsage('pdf-convert');
-            } catch (err) { alert('转换失败'); }
-            setLoader(false);
+        window.submitMessage = async () => {
+            const content = document.getElementById('msg-input').value;
+            if (!content) return alert('请输入内容');
+            // 注意这里：表名已经改为 messages
+            const { error } = await supabase.from('messages').insert([{ content: content }]);
+            if (!error) { alert('留言已发送！'); document.getElementById('msg-input').value = ''; }
+            else { alert('发送失败，请确认数据库权限'); }
         };
 
         window.clearAll = () => previewArea.innerHTML = '';
-        window.deleteSelected = () => previewArea.querySelectorAll('.img-item').forEach(el => { if(el.querySelector('input').checked) el.remove(); });
-        
-        // 留言提交修复
-        window.submitMessage = async () => {
-            const content = document.getElementById('msg-input').value;
-            if (!content) return alert('请输入留言内容');
-            const { error } = await supabase.from('user_messages').insert([{ content: content }]);
-            if (!error) { 
-                alert('感谢反馈，留言已发送！'); 
-                document.getElementById('msg-input').value = ''; 
-            } else {
-                console.error(error);
-                alert('发送失败，请检查数据库权限');
-            }
-        };
+        window.handleMergeFiles = (i) => { if(i.files.length > 0){ document.getElementById('merge-text').innerText = `已选 ${i.files.length} 个`; document.getElementById('btn-merge').disabled = false; document.getElementById('btn-merge').classList.remove('opacity-50'); } };
+        window.handleConvertFile = (i) => { if(i.files.length > 0){ document.getElementById('convert-text').innerText = `已就绪: ${i.files[0].name.substring(0,10)}`; document.getElementById('btn-convert-zip').disabled = false; document.getElementById('btn-convert-zip').classList.remove('opacity-50'); } };
 
-        const loadAds = async () => {
+        (async () => {
             const { data } = await supabase.from('ads_config').select('*').order('id', { ascending: true });
-            if (data && data.length >= 2) {
-                document.getElementById('ad-img-1').src = data[0].img_url;
-                document.getElementById('ad-link-1').href = data[0].link_url;
-                document.getElementById('ad-img-2').src = data[1].img_url;
-                document.getElementById('ad-link-2').href = data[1].link_url;
+            if (data) {
+                document.getElementById('ad-img-1').src = data[0]?.img_url; document.getElementById('ad-link-1').href = data[0]?.link_url;
+                document.getElementById('ad-img-2').src = data[1]?.img_url; document.getElementById('ad-link-2').href = data[1]?.link_url;
             }
-        };
-        loadAds();
+        })();
     </script>
 </body>
 </html>

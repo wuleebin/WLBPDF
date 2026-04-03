@@ -22,33 +22,30 @@
             <div class="space-y-4">
                 <input type="text" id="login-user" placeholder="账号" class="input-field text-center">
                 <input type="password" id="login-pass" placeholder="密码" class="input-field text-center">
-                <button onclick="handleLogin()" class="btn-save w-full mt-4">登录系统</button>
+                <button onclick="handleLogin()" class="btn-save w-full mt-4">进入后台</button>
             </div>
-            <p id="login-error" class="text-[10px] text-red-400 mt-4 opacity-0 transition-opacity">账号或密码有误</p>
+            <p id="login-error" class="text-[10px] text-red-400 mt-4 opacity-0 transition-opacity">信息有误</p>
         </div>
     </div>
 
     <div id="admin-content" class="max-w-2xl mx-auto">
-        <header class="mb-10 flex justify-between items-center">
-            <span class="text-xs font-bold tracking-widest opacity-40">WLB 管理面板</span>
-            <button onclick="location.reload()" class="text-[11px] opacity-30">退出</button>
-        </header>
+        <header class="mb-10 flex justify-between items-center text-xs opacity-40"><span>WLB CONTROL</span><button onclick="location.reload()">退出</button></header>
 
         <div class="grid grid-cols-3 gap-4 mb-6 text-center">
-            <div class="admin-card"><p class="text-[10px] opacity-40 mb-1">图片转PDF</p><h2 id="stat-1" class="text-xl">0</h2></div>
-            <div class="admin-card"><p class="text-[10px] opacity-40 mb-1">PDF合并</p><h2 id="stat-2" class="text-xl">0</h2></div>
-            <div class="admin-card"><p class="text-[10px] opacity-40 mb-1">转换导出</p><h2 id="stat-3" class="text-xl">0</h2></div>
+            <div class="admin-card"><p class="text-[10px] opacity-40">图片转PDF</p><h2 id="stat-1" class="text-xl">0</h2></div>
+            <div class="admin-card"><p class="text-[10px] opacity-40">合并PDF</p><h2 id="stat-2" class="text-xl">0</h2></div>
+            <div class="admin-card"><p class="text-[10px] opacity-40">转换功能</p><h2 id="stat-3" class="text-xl">0</h2></div>
         </div>
 
         <div class="admin-card">
-            <h2 class="text-xs font-bold mb-4 opacity-60">广告位管理</h2>
-            <div><p class="text-[9px] mb-1 opacity-40">广告位 1 (图/链)</p><input id="ad1-img" class="input-field"><input id="ad1-link" class="input-field"></div>
-            <div class="mt-4"><p class="text-[9px] mb-1 opacity-40">广告位 2 (图/链)</p><input id="ad2-img" class="input-field"><input id="ad2-link" class="input-field"></div>
+            <h2 class="text-xs font-bold mb-4">广告设置</h2>
+            <div><p class="text-[9px] mb-1 opacity-40">广告 1</p><input id="ad1-img" class="input-field"><input id="ad1-link" class="input-field"></div>
+            <div class="mt-4"><p class="text-[9px] mb-1 opacity-40">广告 2</p><input id="ad2-img" class="input-field"><input id="ad2-link" class="input-field"></div>
             <button onclick="saveAds()" class="btn-save mt-4 w-full">确认更新</button>
         </div>
 
         <div class="admin-card">
-            <h2 class="text-xs font-bold mb-4 opacity-60">最新反馈留言</h2>
+            <h2 class="text-xs font-bold mb-4">反馈列表</h2>
             <div id="message-list" class="space-y-2 text-xs"></div>
         </div>
     </div>
@@ -62,9 +59,7 @@
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('admin-content').style.display = 'block';
                 load();
-            } else {
-                document.getElementById('login-error').style.opacity = '1';
-            }
+            } else { document.getElementById('login-error').style.opacity = '1'; }
         };
 
         async function load() {
@@ -79,10 +74,8 @@
                 document.getElementById('ad1-img').value = ads[0].img_url; document.getElementById('ad1-link').value = ads[0].link_url;
                 document.getElementById('ad2-img').value = ads[1].img_url; document.getElementById('ad2-link').value = ads[1].link_url;
             }
-            const { data: msgs } = await supabase.from('user_messages').select('*').order('created_at',{ascending:false});
-            if(msgs) {
-                document.getElementById('message-list').innerHTML = msgs.map(m=>`<div class="border-b py-2 flex justify-between"><span>${m.content}</span><span class="opacity-30">${new Date(m.created_at).toLocaleDateString()}</span></div>`).join('');
-            }
+            const { data: msgs } = await supabase.from('messages').select('*').order('created_at',{ascending:false});
+            document.getElementById('message-list').innerHTML = msgs.map(m=>`<div class="border-b py-2 flex justify-between"><span>${m.content}</span><span class="opacity-20">${new Date(m.created_at).toLocaleDateString()}</span></div>`).join('');
         }
 
         window.saveAds = async () => {
@@ -91,7 +84,7 @@
                 {id:2, img_url: document.getElementById('ad2-img').value, link_url: document.getElementById('ad2-link').value}
             ];
             for(let item of updates) await supabase.from('ads_config').update(item).eq('id', item.id);
-            alert('更新成功！');
+            alert('保存成功！');
         };
     </script>
 </body>
